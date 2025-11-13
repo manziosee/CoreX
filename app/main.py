@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import customers, accounts, transactions, auth
+from app.api import customers, accounts, transactions, auth, kyc
 from app.core.config import settings
 from app.database import engine
 from app.models import Base
@@ -16,7 +16,8 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_tags=[
         {"name": "Authentication", "description": "User authentication and JWT token management"},
-        {"name": "Customers", "description": "Customer registration and KYC management"},
+        {"name": "Customers", "description": "Customer registration and management"},
+        {"name": "KYC", "description": "Know Your Customer document upload and verification"},
         {"name": "Accounts", "description": "Bank account creation and balance management"},
         {"name": "Transactions", "description": "Transaction processing with double-entry accounting"}
     ]
@@ -34,6 +35,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(customers.router, prefix="/customers", tags=["Customers"])
+app.include_router(kyc.router, prefix="/kyc", tags=["KYC"])
 app.include_router(accounts.router, prefix="/accounts", tags=["Accounts"])
 app.include_router(transactions.router, prefix="/transactions", tags=["Transactions"])
 

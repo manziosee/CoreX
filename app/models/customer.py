@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Date, DateTime, Enum
+from sqlalchemy import Column, String, Date, DateTime, Enum, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -26,9 +26,15 @@ class Customer(Base):
     email = Column(String(255), unique=True)
     phone = Column(String(20))
     date_of_birth = Column(Date)
+    address = Column(Text)
+    city = Column(String(100))
+    country = Column(String(100))
+    occupation = Column(String(100))
+    income_range = Column(String(50))
     kyc_status = Column(Enum(KYCStatus), default=KYCStatus.PENDING)
     status = Column(Enum(CustomerStatus), default=CustomerStatus.ACTIVE)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     accounts = relationship("Account", back_populates="customer")
+    kyc_documents = relationship("KYCDocument", back_populates="customer")
