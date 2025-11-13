@@ -12,6 +12,11 @@ CREATE TABLE customers (
     email VARCHAR(255) UNIQUE,
     phone VARCHAR(20),
     date_of_birth DATE,
+    address TEXT,
+    city VARCHAR(100),
+    country VARCHAR(100),
+    occupation VARCHAR(100),
+    income_range VARCHAR(50),
     kyc_status VARCHAR(20) DEFAULT 'PENDING',
     status VARCHAR(20) DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -83,6 +88,21 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- KYC Documents table
+CREATE TABLE kyc_documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    customer_id UUID REFERENCES customers(id),
+    document_type VARCHAR(20) NOT NULL,
+    document_number VARCHAR(100),
+    file_path VARCHAR(500),
+    status VARCHAR(20) DEFAULT 'PENDING',
+    verified_by UUID REFERENCES users(id),
+    rejection_reason TEXT,
+    expires_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Audit logs
 CREATE TABLE audit_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -99,6 +119,8 @@ CREATE INDEX idx_customers_number ON customers(customer_number);
 CREATE INDEX idx_accounts_number ON accounts(account_number);
 CREATE INDEX idx_transactions_id ON transactions(transaction_id);
 CREATE INDEX idx_entries_transaction ON entries(transaction_id);
+CREATE INDEX idx_kyc_documents_customer ON kyc_documents(customer_id);
+CREATE INDEX idx_kyc_documents_status ON kyc_documents(status);
 CREATE INDEX idx_audit_logs_user ON audit_logs(user_id);
 CREATE INDEX idx_audit_logs_created ON audit_logs(created_at);
 
