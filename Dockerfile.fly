@@ -5,14 +5,22 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
+    sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.fly.txt .
+RUN pip install --no-cache-dir -r requirements.fly.txt
 
 # Copy application code
 COPY . .
+
+# Copy and make startup script executable
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Create SQLite database directory
+RUN mkdir -p /app/data
 
 # Create non-root user
 RUN useradd -m -u 1000 corex && chown -R corex:corex /app
@@ -20,4 +28,5 @@ USER corex
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use startup script
+CMD ["/app/start.sh"]

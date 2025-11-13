@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://corex:corex123@postgres:5432/corex_db
+      - DATABASE_URL=postgresql://postgres:2001@postgres:5432/coreX-DB
       - REDIS_URL=redis://redis:6379
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -23,9 +23,9 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: corex_db
-      POSTGRES_USER: corex
-      POSTGRES_PASSWORD: corex123
+      POSTGRES_DB: coreX-DB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2001
     ports:
       - "5432:5432"
     volumes:
@@ -87,10 +87,10 @@ services:
       - "3001:3000"
     environment:
       - MB_DB_TYPE=postgres
-      - MB_DB_DBNAME=corex_db
+      - MB_DB_DBNAME=coreX-DB
       - MB_DB_PORT=5432
-      - MB_DB_USER=corex
-      - MB_DB_PASS=corex123
+      - MB_DB_USER=postgres
+      - MB_DB_PASS=2001
       - MB_DB_HOST=postgres
     depends_on:
       - postgres
