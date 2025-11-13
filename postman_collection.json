@@ -1,0 +1,492 @@
+{
+	"info": {
+		"_postman_id": "corex-banking-api",
+		"name": "CoreX Banking System API",
+		"description": "Complete API collection for CoreX Banking System with KYC, Customer Management, Accounts, and Transactions",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin123",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/token",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "token"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"date_of_birth\": \"1990-01-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/customers/",
+							"host": ["{{base_url}}"],
+							"path": ["customers", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Onboard Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"+1234567891\",\n  \"date_of_birth\": \"1985-05-20\",\n  \"address\": \"123 Main Street\",\n  \"city\": \"New York\",\n  \"country\": \"USA\",\n  \"occupation\": \"Software Engineer\",\n  \"income_range\": \"50000-75000\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/customers/onboard",
+							"host": ["{{base_url}}"],
+							"path": ["customers", "onboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/customers/{{customer_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["customers", "{{customer_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/customers/?skip=0&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["customers", ""],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update KYC Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"kyc_status\": \"APPROVED\",\n  \"reason\": \"All documents verified\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/customers/{{customer_id}}/kyc-status",
+							"host": ["{{base_url}}"],
+							"path": ["customers", "{{customer_id}}", "kyc-status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending KYC Customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/customers/pending-kyc",
+							"host": ["{{base_url}}"],
+							"path": ["customers", "pending-kyc"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "KYC",
+			"item": [
+				{
+					"name": "Upload KYC Document",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "customer_id",
+									"value": "{{customer_id}}",
+									"type": "text"
+								},
+								{
+									"key": "document_type",
+									"value": "NATIONAL_ID",
+									"type": "text"
+								},
+								{
+									"key": "document_number",
+									"value": "ID123456789",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/kyc/documents",
+							"host": ["{{base_url}}"],
+							"path": ["kyc", "documents"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer Documents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kyc/customers/{{customer_id}}/documents",
+							"host": ["{{base_url}}"],
+							"path": ["kyc", "customers", "{{customer_id}}", "documents"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Document",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"APPROVED\",\n  \"rejection_reason\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/kyc/documents/{{document_id}}/verify?verifier_id={{user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["kyc", "documents", "{{document_id}}", "verify"],
+							"query": [
+								{
+									"key": "verifier_id",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check KYC Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kyc/customers/{{customer_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["kyc", "customers", "{{customer_id}}", "status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get KYC Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kyc/dashboard/statistics",
+							"host": ["{{base_url}}"],
+							"path": ["kyc", "dashboard", "statistics"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get KYC Requirements",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/kyc/requirements?customer_type=individual",
+							"host": ["{{base_url}}"],
+							"path": ["kyc", "requirements"],
+							"query": [
+								{
+									"key": "customer_type",
+									"value": "individual"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "Create Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": \"{{customer_id}}\",\n  \"account_type\": \"SAVINGS\",\n  \"currency\": \"USD\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/accounts/",
+							"host": ["{{base_url}}"],
+							"path": ["accounts", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accounts/{{account_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["accounts", "{{account_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account Balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accounts/{{account_id}}/balance",
+							"host": ["{{base_url}}"],
+							"path": ["accounts", "{{account_id}}", "balance"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer Accounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accounts/customer/{{customer_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["accounts", "customer", "{{customer_id}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Create Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"from_account_id\": \"{{from_account_id}}\",\n  \"to_account_id\": \"{{to_account_id}}\",\n  \"amount\": 100.00,\n  \"currency\": \"USD\",\n  \"transaction_type\": \"TRANSFER\",\n  \"description\": \"Transfer between accounts\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transactions/",
+							"host": ["{{base_url}}"],
+							"path": ["transactions", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transaction",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/transactions/{{transaction_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["transactions", "{{transaction_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/transactions/account/{{account_id}}?skip=0&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["transactions", "account", "{{account_id}}"],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Process Transaction",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/transactions/{{transaction_id}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["transactions", "{{transaction_id}}", "process"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Root",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

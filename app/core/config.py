@@ -3,7 +3,8 @@ from typing import Optional
 import os
 
 class Settings(BaseSettings):
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://corex:corex123@localhost:5432/corex_db")
+    database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:2001@localhost:5432/coreX-DB")
+    environment: str = os.getenv("ENVIRONMENT", "development")
     redis_url: str = "redis://localhost:6379"
     rabbitmq_url: str = "amqp://guest:guest@localhost:5672/"
     jwt_secret: str = "your-super-secret-jwt-key-change-in-production"
