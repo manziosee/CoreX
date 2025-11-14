@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from app.api import customers, accounts, transactions, auth, kyc
+from app.api import customers, accounts, transactions, auth, kyc, loans, payments
 from app.core.config import settings
 from app.database import engine
 from app.models import Base
@@ -45,23 +45,35 @@ app = FastAPI(
     openapi_tags=[
         {
             "name": "Authentication", 
-            "description": "🔐 User authentication, JWT token management, and role-based access control"
+            "description": "🔐 **User authentication and role-based access control**\n\n**Available User Roles:**\n- `ADMIN`: Full system access, user management\n- `TELLER`: Customer operations, transactions\n- `AUDITOR`: Read-only access to all data\n- `API_USER`: Limited programmatic access\n\n**Default Users:**\n- Username: `admin`, Password: `admin123` (ADMIN)\n- Create more users via register endpoint",
+            "externalDocs": {
+                "description": "Authentication Guide",
+                "url": "https://github.com/manziosee/CoreX/blob/main/docs/AUTHENTICATION.md"
+            }
         },
         {
             "name": "Customers", 
-            "description": "👥 Customer registration, onboarding, and profile management"
+            "description": "👥 **Customer registration, onboarding, and profile management**\n\nManage customer lifecycle from registration to account closure with comprehensive KYC integration."
         },
         {
             "name": "KYC", 
-            "description": "📋 Know Your Customer document upload, verification, and compliance tracking"
+            "description": "📋 **Know Your Customer document upload, verification, and compliance**\n\nComplete KYC workflow with document management, verification processes, and compliance reporting."
         },
         {
             "name": "Accounts", 
-            "description": "💳 Bank account creation, balance management, and multi-currency support"
+            "description": "💳 **Bank account creation, balance management, and multi-currency support**\n\nSupports SAVINGS, CURRENT, and LOAN account types with real-time balance tracking."
         },
         {
             "name": "Transactions", 
-            "description": "💸 Transaction processing with double-entry accounting and audit trails"
+            "description": "💸 **Transaction processing with double-entry accounting**\n\nSecure transaction processing with ACID compliance, audit trails, and real-time balance updates."
+        },
+        {
+            "name": "Loans", 
+            "description": "🏠 **Complete loan management system**\n\nHandle loan applications, approvals, disbursements, and payment tracking with automated interest calculations."
+        },
+        {
+            "name": "Payments", 
+            "description": "💳 **Advanced payment services**\n\nBill payments, standing orders, bulk transfers, and automated payment processing."
         }
     ],
     servers=[
@@ -91,6 +103,8 @@ app.include_router(customers.router, prefix="/customers", tags=["Customers"])
 app.include_router(kyc.router, prefix="/kyc", tags=["KYC"])
 app.include_router(accounts.router, prefix="/accounts", tags=["Accounts"])
 app.include_router(transactions.router, prefix="/transactions", tags=["Transactions"])
+app.include_router(loans.router, prefix="/loans", tags=["Loans"])
+app.include_router(payments.router, prefix="/payments", tags=["Payments"])
 
 # Custom OpenAPI schema with security
 def custom_openapi():

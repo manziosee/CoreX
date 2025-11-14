@@ -19,12 +19,44 @@
 		{
 			"key": "base_url",
 			"value": "http://localhost:8000",
-			"type": "string"
+			"type": "string",
+			"description": "API base URL - change to https://corex-banking.fly.dev for production"
 		},
 		{
 			"key": "access_token",
 			"value": "",
-			"type": "string"
+			"type": "string",
+			"description": "JWT access token - automatically set after login"
+		},
+		{
+			"key": "customer_id",
+			"value": "",
+			"type": "string",
+			"description": "Customer ID for testing - set after creating a customer"
+		},
+		{
+			"key": "account_id",
+			"value": "",
+			"type": "string",
+			"description": "Account ID for testing - set after creating an account"
+		},
+		{
+			"key": "loan_id",
+			"value": "",
+			"type": "string",
+			"description": "Loan ID for testing - set after creating a loan"
+		},
+		{
+			"key": "from_account_id",
+			"value": "",
+			"type": "string",
+			"description": "Source account ID for transfers"
+		},
+		{
+			"key": "to_account_id",
+			"value": "",
+			"type": "string",
+			"description": "Destination account ID for transfers"
 		}
 	],
 	"item": [
@@ -32,7 +64,7 @@
 			"name": "Authentication",
 			"item": [
 				{
-					"name": "Login",
+					"name": "Login - Admin",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -47,12 +79,14 @@
 								{
 									"key": "username",
 									"value": "admin",
-									"type": "text"
+									"type": "text",
+									"description": "Admin user with full system access"
 								},
 								{
 									"key": "password",
 									"value": "admin123",
-									"type": "text"
+									"type": "text",
+									"description": "Default admin password"
 								}
 							]
 						},
@@ -79,7 +113,107 @@
 					"response": []
 				},
 				{
-					"name": "Register User (Admin Only)",
+				},
+				{
+					"name": "Login - Teller",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "teller1",
+									"type": "text",
+									"description": "Teller user for customer operations"
+								},
+								{
+									"key": "password",
+									"value": "teller123",
+									"type": "text",
+									"description": "Teller password"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/token",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "token"]
+						},
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"if (pm.response.code === 200) {",
+										"    var jsonData = pm.response.json();",
+										"    pm.collectionVariables.set('access_token', jsonData.access_token);",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}
+						]
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Auditor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "auditor1",
+									"type": "text",
+									"description": "Auditor user with read-only access"
+								},
+								{
+									"key": "password",
+									"value": "auditor123",
+									"type": "text",
+									"description": "Auditor password"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/token",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "token"]
+						},
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"if (pm.response.code === 200) {",
+										"    var jsonData = pm.response.json();",
+										"    pm.collectionVariables.set('access_token', jsonData.access_token);",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}
+						]
+					},
+					"response": []
+				},
+				{
+					"name": "Register User (Admin Only)"
 					"request": {
 						"method": "POST",
 						"header": [
@@ -90,7 +224,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"teller1\",\n  \"email\": \"teller1@corex-banking.com\",\n  \"password\": \"teller123\",\n  \"role\": \"TELLER\"\n}"
+							"raw": "{\n  \"username\": \"teller1\",\n  \"email\": \"teller1@corex-banking.com\",\n  \"password\": \"teller123\",\n  \"role\": \"TELLER\"\n}\n\n// Available roles: ADMIN, TELLER, AUDITOR, API_USER\n// Change username, email, password as needed",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/register",
@@ -232,7 +371,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"date_of_birth\": \"1990-01-15\"\n}"
+							"raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"date_of_birth\": \"1990-01-15\"\n}\n\n// Required fields: first_name, last_name\n// Optional: email, phone, date_of_birth\n// Date format: YYYY-MM-DD",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/customers/",
@@ -481,7 +625,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"customer_id\": \"{{customer_id}}\",\n  \"account_type\": \"SAVINGS\",\n  \"currency\": \"USD\"\n}"
+							"raw": "{\n  \"customer_id\": \"{{customer_id}}\",\n  \"account_type\": \"SAVINGS\",\n  \"currency\": \"USD\"\n}\n\n// Account types: SAVINGS, CURRENT, LOAN\n// Currencies: USD, EUR, GBP, etc.\n// Replace {{customer_id}} with actual customer ID",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{base_url}}/accounts/",
@@ -602,6 +751,179 @@
 							"raw": "{{base_url}}/transactions/{{transaction_id}}/process",
 							"host": ["{{base_url}}"],
 							"path": ["transactions", "{{transaction_id}}", "process"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loans",
+			"item": [
+				{
+					"name": "Apply for Loan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_id\": \"{{customer_id}}\",\n  \"loan_type\": \"PERSONAL\",\n  \"principal_amount\": 10000.00,\n  \"term_months\": 24,\n  \"purpose\": \"Home improvement\",\n  \"collateral_description\": \"Property deed\"\n}\n\n// Loan types: PERSONAL, BUSINESS, MORTGAGE, AUTO\n// Term: 1-360 months\n// Amount: Must be positive",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/loans/applications",
+							"host": ["{{base_url}}"],
+							"path": ["loans", "applications"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Loan (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"interest_rate\": 12.5,\n  \"approved_amount\": 8000.00\n}\n\n// Interest rate: Annual percentage (0-100)\n// Approved amount: Can be different from requested",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/loans/{{loan_id}}/approve",
+							"host": ["{{base_url}}"],
+							"path": ["loans", "{{loan_id}}", "approve"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Make Loan Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount_paid\": 500.00\n}\n\n// Payment amount: Must be positive\n// System calculates principal/interest split",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/loans/{{loan_id}}/payments",
+							"host": ["{{base_url}}"],
+							"path": ["loans", "{{loan_id}}", "payments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Loan Applications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/loans/applications?status=PENDING&skip=0&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["loans", "applications"],
+							"query": [
+								{
+									"key": "status",
+									"value": "PENDING",
+									"description": "PENDING, APPROVED, ACTIVE, CLOSED, DEFAULTED"
+								},
+								{
+									"key": "skip",
+									"value": "0"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Pay Bill",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"account_id\": \"{{account_id}}\",\n  \"biller_code\": \"ELEC001\",\n  \"biller_name\": \"Electric Company\",\n  \"bill_account_number\": \"123456789\",\n  \"amount\": 150.00,\n  \"currency\": \"USD\"\n}\n\n// Common biller codes: ELEC001, WATER001, PHONE001\n// Amount must be positive",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/bills",
+							"host": ["{{base_url}}"],
+							"path": ["payments", "bills"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Standing Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"from_account_id\": \"{{from_account_id}}\",\n  \"to_account_id\": \"{{to_account_id}}\",\n  \"amount\": 1000.00,\n  \"currency\": \"USD\",\n  \"frequency\": \"MONTHLY\",\n  \"start_date\": \"2024-01-01T00:00:00Z\",\n  \"description\": \"Monthly rent payment\"\n}\n\n// Frequency: DAILY, WEEKLY, MONTHLY\n// Date format: ISO 8601 (YYYY-MM-DDTHH:MM:SSZ)",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/standing-orders",
+							"host": ["{{base_url}}"],
+							"path": ["payments", "standing-orders"]
 						}
 					},
 					"response": []

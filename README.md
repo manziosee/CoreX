@@ -123,7 +123,19 @@ pytest tests/test_kyc.py -v
 
 ### 🔑 Authentication
 
-**Default Admin Credentials**: `admin` / `admin123`
+**🎯 Test User Credentials:**
+
+| Username | Password | Role | Access Level |
+|----------|----------|------|-------------|
+| `admin` | `admin123` | ADMIN | Full system access, user management |
+| `teller1` | `teller123` | TELLER | Customer operations, transactions |
+| `auditor1` | `auditor123` | AUDITOR | Read-only access to all data |
+| `api_user1` | `api123` | API_USER | Limited programmatic access |
+
+**Setup Test Users:**
+```bash
+python3 create_test_users.py
+```
 
 ```bash
 # Get access token
