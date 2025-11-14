@@ -1,8 +1,8 @@
 #!/bin/bash
+set -e
 
-# CoreX Banking System - Fly.io Deployment Script
-
-echo "🚀 Deploying CoreX Banking System to Fly.io..."
+echo "🚀 CoreX Banking System - Fly.io Deployment"
+echo "============================================="
 
 # Check if flyctl is installed
 if ! command -v flyctl &> /dev/null; then
@@ -11,28 +11,54 @@ if ! command -v flyctl &> /dev/null; then
     exit 1
 fi
 
-# Login to Fly.io (if not already logged in)
-echo "🔐 Checking Fly.io authentication..."
-flyctl auth whoami || flyctl auth login
+# Check if logged in
+if ! flyctl auth whoami &> /dev/null; then
+    echo "🔐 Please login to Fly.io first:"
+    flyctl auth login
+fi
 
-# Create PostgreSQL database
-echo "🗄️ Creating PostgreSQL database..."
-flyctl postgres create --name corex-db --region iad --vm-size shared-cpu-1x --volume-size 10
+# Check if app exists
+if ! flyctl apps list | grep -q "corex-banking"; then
+    echo "📱 Creating new Fly.io app..."
+    flyctl apps create corex-banking --org personal
+fi
 
-# Get database connection string
-echo "📝 Getting database connection string..."
-flyctl postgres attach --app corex-banking corex-db
+# Create volume if it doesn't exist
+if ! flyctl volumes list -a corex-banking | grep -q "corex_data"; then
+    echo "💾 Creating persistent volume..."
+    flyctl volumes create corex_data --region iad --size 1 -a corex-banking
+fi
 
-# Set environment variables
-echo "⚙️ Setting environment variables..."
+# Set secrets
+echo "🔐 Setting production secrets..."
 flyctl secrets set \
-  JWT_SECRET=$(openssl rand -base64 32) \
-  ENVIRONMENT=production
+    JWT_SECRET="$(openssl rand -base64 32)" \
+    DATABASE_URL="sqlite:///app/data/corex.db" \
+    ENVIRONMENT="production" \
+    -a corex-banking
 
 # Deploy the application
-echo "🚀 Deploying application..."
-flyctl deploy --dockerfile Dockerfile.fly
+echo "🚀 Deploying to Fly.io..."
+flyctl deploy --dockerfile Dockerfile.fly -a corex-banking
 
+# Show deployment status
 echo "✅ Deployment complete!"
-echo "🌐 Your CoreX Banking System is available at: https://corex-banking.fly.dev"
-echo "📚 API Documentation: https://corex-banking.fly.dev/docs"
+echo ""
+echo "🌐 Your CoreX Banking System is now live at:"
+echo "   https://corex-banking.fly.dev"
+echo ""
+echo "📚 API Documentation:"
+echo "   https://corex-banking.fly.dev/docs"
+echo ""
+echo "🔍 Health Check:"
+echo "   https://corex-banking.fly.dev/health"
+echo ""
+echo "📊 Monitor your app:"
+echo "   flyctl logs -a corex-banking"
+echo "   flyctl status -a corex-banking"
+echo ""
+echo "🔑 Default Login Credentials:"
+echo "   Username: admin"
+echo "   Password: admin123"
+echo ""
+echo "🎉 Happy Banking! 🏦"

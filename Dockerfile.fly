@@ -1,30 +1,56 @@
+FROM python:3.11-slim as builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libffi-dev \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install requirements
+COPY requirements.fly.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.fly.txt
+
+# Production stage
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
-    gcc \
     sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Copy requirements first for better caching
-COPY requirements.fly.txt .
-RUN pip install --no-cache-dir -r requirements.fly.txt
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Create non-root user
+RUN useradd -m -u 1000 corex
 
 # Copy application code
 COPY . .
 
-# Copy and make startup script executable
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+# Create directories and set permissions
+RUN mkdir -p /app/data /app/uploads /app/logs && \
+    chmod +x /app/start.sh && \
+    chown -R corex:corex /app && \
+    chmod 755 /app/data /app/uploads /app/logs
 
-# Create SQLite database directory
-RUN mkdir -p /app/data
-
-# Create non-root user
-RUN useradd -m -u 1000 corex && chown -R corex:corex /app
+# Switch to non-root user
 USER corex
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
 EXPOSE 8000
 

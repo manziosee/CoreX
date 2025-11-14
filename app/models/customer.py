@@ -38,3 +38,4 @@ class Customer(Base):
     
     accounts = relationship("Account", back_populates="customer")
     kyc_documents = relationship("KYCDocument", back_populates="customer")
+    loans = relationship("Loan", back_populates="customer")
