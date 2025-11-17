@@ -106,6 +106,11 @@ test:
 	@echo "🧪 Running all tests..."
 	./venv/bin/pytest -v
 
+test-notifications:
+	@echo "🔔 Testing notifications system..."
+	./venv/bin/pytest tests/test_notifications_comprehensive.py -v
+	./venv/bin/pytest tests/test_notifications_integration.py -v
+
 test-auth:
 	@echo "🔐 Testing authentication..."
 	./venv/bin/python test_auth_endpoints.py
@@ -113,6 +118,14 @@ test-auth:
 test-coverage:
 	@echo "📊 Running tests with coverage..."
 	./venv/bin/pytest --cov=app --cov-report=html
+
+test-unit:
+	@echo "🔬 Running unit tests only..."
+	./venv/bin/pytest tests/test_notifications_comprehensive.py tests/test_main.py tests/test_auth.py -v
+
+test-integration:
+	@echo "🔗 Running integration tests..."
+	./venv/bin/pytest tests/test_notifications_integration.py -v
 
 # Deployment
 deploy:
