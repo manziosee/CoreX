@@ -63,7 +63,7 @@ class KYCWorkflowService:
         else:
             customer.kyc_status = KYCStatus.PENDING
         
-        # Log status change
+        # Log status change and send notification
         if old_status != customer.kyc_status:
             audit_log = AuditLog(
                 user_id=user_id,
@@ -77,6 +77,9 @@ class KYCWorkflowService:
                 }
             )
             self.db.add(audit_log)
+            
+            # Send KYC status notification
+            self._send_kyc_notification(customer.id, customer.kyc_status.value)
         
         self.db.commit()
         return customer.kyc_status
@@ -98,3 +101,12 @@ class KYCWorkflowService:
             "pending_document_reviews": pending_documents,
             "completion_rate": (approved_kyc / total_customers * 100) if total_customers > 0 else 0
         }
+    
+    def _send_kyc_notification(self, customer_id: str, status: str):
+        """Send KYC status update notification"""
+        try:
+            from app.services.notification import NotificationService
+            notification_service = NotificationService(self.db)
+            notification_service.send_kyc_notification(customer_id, status)
+        except Exception as e:
+            print(f"KYC notification failed: {e}")

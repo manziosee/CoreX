@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from app.api import customers, accounts, transactions, auth, kyc, loans, payments
+from app.api import customers, accounts, transactions, auth, kyc, loans, payments, notifications
 from app.core.config import settings
 from app.database import engine
 from app.models import Base
@@ -74,6 +74,10 @@ app = FastAPI(
         {
             "name": "Payments", 
             "description": "💳 **Advanced payment services**\n\nBill payments, standing orders, bulk transfers, and automated payment processing."
+        },
+        {
+            "name": "Notifications", 
+            "description": "🔔 **Notification management system**\n\nSMS, email, and in-app notifications for transactions, KYC updates, and system alerts."
         }
     ],
     servers=[
@@ -105,6 +109,7 @@ app.include_router(accounts.router, prefix="/accounts", tags=["Accounts"])
 app.include_router(transactions.router, prefix="/transactions", tags=["Transactions"])
 app.include_router(loans.router, prefix="/loans", tags=["Loans"])
 app.include_router(payments.router, prefix="/payments", tags=["Payments"])
+app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 
 # Custom OpenAPI schema with security
 def custom_openapi():

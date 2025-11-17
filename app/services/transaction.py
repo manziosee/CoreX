@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.transaction import Transaction, Entry, TransactionStatus, EntryType
-from app.models.account import Balance
+from app.models.account import Balance, Account
 from app.schemas.transaction import TransactionCreate
 from typing import List, Optional
 from datetime import datetime
@@ -69,6 +69,9 @@ class TransactionService:
             transaction.status = TransactionStatus.COMPLETED
             transaction.processed_at = datetime.utcnow()
             
+            # Send notifications
+            self._send_transaction_notifications(transaction)
+            
             self.db.commit()
             return True
             
@@ -83,3 +86,32 @@ class TransactionService:
         if balance:
             balance.ledger_balance += amount
             balance.available_balance += amount
+    
+    def _send_transaction_notifications(self, transaction: Transaction):
+        """Send notifications for completed transactions"""
+        try:
+            from app.services.notification import NotificationService
+            notification_service = NotificationService(self.db)
+            
+            # Notify sender
+            if transaction.from_account_id:
+                account = self.db.query(Account).filter(Account.id == transaction.from_account_id).first()
+                if account and account.customer_id:
+                    notification_service.send_transaction_notification(
+                        account.customer_id, 
+                        float(transaction.amount), 
+                        "debited"
+                    )
+            
+            # Notify receiver
+            if transaction.to_account_id:
+                account = self.db.query(Account).filter(Account.id == transaction.to_account_id).first()
+                if account and account.customer_id:
+                    notification_service.send_transaction_notification(
+                        account.customer_id, 
+                        float(transaction.amount), 
+                        "credited"
+                    )
+        except Exception as e:
+            # Don't fail transaction if notification fails
+            print(f"Notification failed: {e}")
